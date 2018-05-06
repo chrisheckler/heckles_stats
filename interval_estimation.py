@@ -179,3 +179,40 @@ def conf_interval_two_means(datae,dataf,conf):
     upper = (mean_e-mean_f)+(Sp*t*np.sqrt(1/n_e+1/n_f))
 
     return lower,upper
+
+def hypothesis_test_two_means_testvalue(datae,dataf,test_value,alpha):
+    """ Hypothesis test between two  means and
+        a test value.
+
+        Each data set has following variables:
+        data, n, mean, var and df.
+
+        The T*, p-value and decision are returned.
+    """
+    
+    # Dataset E
+    data_e = 1.0*np.array(datae)
+    n_e = data_e.shape[0]*data_e.shape[1]
+    mean_e = np.array(data_e).mean()
+    var_e = np.array(data_e).var(ddof=1)
+    df_e = n_e-1
+    
+    # Dataset F
+    data_f = 1.0*np.array(dataf)
+    n_f = dataf.shape[0]*dataf.shape[1]
+    mean_f = np.array(data_f).mean()
+    var_f = np.array(data_f).var(ddof=1)
+    df_f = n_f-1
+    
+    # Sp,t and pvalue
+    Sp = np.sqrt((((df_e*var_e) + (df_f*var_f))/(df_e+df_f)))
+    t = ((mean_e-mean_f)-test_value)/(Sp*np.sqrt(1/n_e+1/n_f))
+    pvalue = 1-scs.t.cdf(t,df_e+df_f,)
+    
+    # Decision
+    if pvalue > alpha:
+        decision = 'Fail to Reject H0'
+        return t,pvalue,decision
+    else:
+        decision = 'Reject H0'
+        return t,pvalue,decision
