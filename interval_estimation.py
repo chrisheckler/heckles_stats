@@ -57,14 +57,14 @@ def var_conf_interval(data, conf):
     return lower,upper
 
 def mean_hypothesis_test(data,alpha,test_value):
-    """  Function takes data, alpha and test_value.
+    '''  Function takes data, alpha and test_value.
     
          Variables needed for computation:
          data, n, df, mean, std.  
          
          Calculates and returns the z-score, p-value
          and a decision to Reject or Fail to Reject H0.
-    """    
+    '''    
 
     data = 1.0*np.array(data)
     n = data.shape[0]*data.shape[1]
@@ -82,3 +82,68 @@ def mean_hypothesis_test(data,alpha,test_value):
         decision = 'Reject H0'
         return zscore,pvalue,decision
 
+def var_hypothesis_test(data,alpha,test_value):
+    '''  This function tests the variance against a value.
+         Function takes data, alpha and test_value.
+    
+         Variables needed for computation:
+         data, n , df , mean, std, var,
+         chi_score.
+ 
+         The p-value and Decision are returned.
+    '''
+
+    data = 1.0*np.array(data)
+    n = data.shape[0]*data.shape[1]
+    df = n - 1
+    mean = np.array(data).mean()
+    std = np.array(data).std(ddof=1)
+    var = np.array(data).var(ddof=1)
+    chi_score = (df*var)/test_value
+    pvalue = scs.chi2.sf(chi_score,df)
+    
+    # Decision 
+    if pvalue > alpha:
+        decision = 'Fail to Reject H0'
+        return pvalue, decision
+    else:
+        decision = 'Reject H0'
+        return pvalue, decision
+
+def two_pop_var_test(datae,dataf,alpha):
+    """ Compares the variance of two populations
+
+        Each data set uses the following variables:
+        data, n, mean, var and df.
+
+        The left and right critical regions are returned
+        along with the F value and a decision.  The decision
+        checks if the F value falls within either region.
+    """
+    
+    # Dataset E
+    data_e = 1.0*np.array(datae)
+    n_e = data_e.shape[0]*data_e.shape[1]
+    mean_e = np.array(data_e).mean()
+    var_e = np.array(data_e).var(ddof=1)
+    df_e = n_e-1
+    
+    # Dataset F
+    data_f = 1.0*np.array(dataf)
+    n_f = dataf.shape[0]*dataf.shape[1]
+    mean_f = np.array(data_f).mean()
+    var_f = np.array(data_f).var(ddof=1)
+    df_f = n_f-1
+    
+    # Calculate Critical Regions
+    F = var_e/var_f
+    critical_region_left = scs.f.ppf(alpha-(alpha/2),df_e,df_f) 
+    critical_region_right = scs.f.ppf(1-alpha/2,df_e,df_f) 
+
+    # Decision 
+    if F < critical_region_left and F > critical_region_right:
+        decision = 'Reject H0'
+        return critical_region_left,critical_region_right,F,decision
+    else:
+        decision = 'Fail to Reject H0'
+        return critical_region_left,critical_region_right,F,decision
