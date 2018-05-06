@@ -19,8 +19,9 @@ def mean_conf_interval(data, conf):
         mean.
     
         Variables needed for computation are:
-        Data,n,mean,std,zscore and interval. Lower
-        and upper bound confidence intervals are returned
+        data,n,mean,std,zscore and interval. 
+
+        Lower and upper bound confidence intervals are returned
     '''
 
     data = 1.0*np.array(data)
@@ -40,6 +41,7 @@ def var_conf_interval(data, conf):
     
         Variables needed for computation:
         data,n,var, left and right chi statistic.
+        
         The upper and lower bound confidence intervals
         returned.
     '''
@@ -53,3 +55,30 @@ def var_conf_interval(data, conf):
     upper = (((n-1)*var)/chi_left_statistic)
     
     return lower,upper
+
+def mean_hypothesis_test(data,alpha,test_value):
+    """  Function takes data, alpha and test_value.
+    
+         Variables needed for computation:
+         data, n, df, mean, std.  
+         
+         Calculates and returns the z-score, p-value
+         and a decision to Reject or Fail to Reject H0.
+    """    
+
+    data = 1.0*np.array(data)
+    n = data.shape[0]*data.shape[1]
+    df = n - 1
+    mean = np.array(data).mean()
+    std = np.array(data).std(ddof=1)
+    zscore = (np.sqrt(n)*(mean-test_value))/std
+    pvalue = sc.special.ndtr(zscore)
+    
+    # Decision
+    if pvalue > alpha:
+        decision = 'Fail to Reject H0'
+        return zscore,pvalue,decision
+    else:
+        decision = 'Reject H0'
+        return zscore,pvalue,decision
+
