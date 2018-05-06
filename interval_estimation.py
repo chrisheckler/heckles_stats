@@ -147,3 +147,35 @@ def two_pop_var_test(datae,dataf,alpha):
     else:
         decision = 'Fail to Reject H0'
         return critical_region_left,critical_region_right,F,decision
+
+def conf_interval_two_means(datae,dataf,conf):
+    """ Finds a confidence interval between two means
+
+        Each data set has the following variables:
+        data, n, mean, var, df.
+
+        The lower and upper bound confidence interval
+        is returned for two means.
+    """
+    
+    # Dataset E
+    data_e = 1.0*np.array(datae)
+    n_e = data_e.shape[0]*data_e.shape[1]
+    mean_e = np.array(data_e).mean()
+    var_e = np.array(data_e).var(ddof=1)
+    df_e = n_e-1
+    
+    # Dataset F
+    data_f = 1.0*np.array(dataf)
+    n_f = dataf.shape[0]*dataf.shape[1]
+    mean_f = np.array(data_f).mean()
+    var_f = np.array(data_f).var(ddof=1)
+    df_f = n_f-1
+    
+    # Sp,t calculated for lower/upper bounds 
+    Sp = np.sqrt((((df_e*var_e) + (df_f*var_f))/(df_e+df_f)))
+    t = abs(scs.t.ppf(((1-conf)/2), (df_e+df_f)))
+    lower = (mean_e-mean_f)-(Sp*t*np.sqrt(1/n_e+1/n_f))
+    upper = (mean_e-mean_f)+(Sp*t*np.sqrt(1/n_e+1/n_f))
+
+    return lower,upper
