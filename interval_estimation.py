@@ -11,8 +11,14 @@ import scipy as sc
 import decimal
 from scipy import stats as scs
 
-# Loading data
-data = pd.read_csv('datasets/data.csv',header=None)
+
+def stat_read_csv(filename):
+    ''' This function returns a dataframe
+    '''    
+    try:    
+         return pd.read_csv(filename)
+    except:
+        print('Error reading file.')
 
 def mean_conf_interval(data, conf):
     ''' This function calculates a confidence interval for the
