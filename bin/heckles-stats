@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+from argparse import ArgumentParser
+import json
+import sys
+
+from interval_estimation import (
+    myclass,
+    myfunction,
+)
+
+
+def create_parser():
+    parser = ArgumentParser(
+        description='Heckles Stats Lib',
+        prog='heckles-stats'
+    )
+
+    parser.add_argument(
+        'operation',
+        help='Data to return from AnalyticsAPI',
+        metavar='operation',
+        type=str,
+        choices=['totals', 'days', 'all'],
+    )
+    parser.add_argument(
+        '-a',
+        '--account-id',
+        required=False,
+        dest="account_id",
+        type=str,
+        help='Account ID'
+    )
+
+    parser.add_argument(
+        '-v',
+        '--version',
+        action='version',
+        version='%(prog)s 0.0.1'
+    )
+
+    parser.add_argument(
+        "-f",
+        '--format',
+        help='format to json',
+        dest='format',
+        type=str,
+        default='default'
+    )
+    return parser
+
+
+def main():
+    parser = create_parser()
+    args = parser.parse_args()
+    print(json.dumps(get_account_analytics(args.account_id, args.operation)))
+
+
+if __name__ == "__main__":
+    main()
