@@ -1,8 +1,6 @@
     """ 
     Copyright (c) 2018 Chris Heckler <hecklerchris@hotmail.com>
     
-    This module takes a .csv and calculates
-    Confidence Intervals and Hypothesis tests for mean, var, etc.
     """
     
     import pandas as pd
@@ -290,6 +288,53 @@ class heckles_stats:
         print('B1   {}'.format(round(B1,4)))
         print('____________________________________________________________')
 
+    def confidence_interval_intercept(data,conf):
+        ''' This function calulates a confidence interval for the intercept
+                 
+            Function takes in data and confidence level
+             
+            The lower and upper bounds are returned  
+        '''
+
+        X = data[0]
+        Y = data[1]
+        N = len(data)
+        Sxx = (sum(map(lambda x: x*x, X)))-(sum(X)**2/N)
+        Syy = (sum(map(lambda x: x*x, Y)))-(sum(Y)**2/N)
+        Sxy = (sum(map(lambda x,y: x*y, X,Y)))-(sum(X)*sum(Y)/N)
+        SSerr = Syy-Sxy**2/Sxx
+
+        mx = X.mean()
+        my = Y.mean()
+
+        B0 = my - (B1 * mx)
+        S2 = SSerr/(N-2)
+        S = np.sqrt(S2)
+    
+        interval = abs(scs.t.ppf((1-conf)/2,df=N-2)) * S * np.sqrt(1/N + (mx**2)/Sxx)
+        lower = B0 - interval
+        upper = B0 + interval
+    
+        return lower,upper         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
 
 if __name__ == '__main__':
