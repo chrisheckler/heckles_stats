@@ -318,9 +318,34 @@ class heckles_stats:
         return lower,upper         
 
 
+    def confidence_interval_slope(data,conf):
+        ''' Calculates a confidence interveral for the slope
 
+            Takes in data and confidence level
 
+            Returns the upper and lower bound.
+        '''
 
+        X = data[0]
+        Y = data[1]
+        N = len(data)
+        Sxx = (sum(map(lambda x: x*x, X)))-(sum(X)**2/N)
+        Syy = (sum(map(lambda x: x*x, Y)))-(sum(Y)**2/N)
+        Sxy = (sum(map(lambda x,y: x*y, X,Y)))-(sum(X)*sum(Y)/N)
+        SSerr = Syy-Sxy**2/Sxx
+
+        mx = X.mean()
+        my = Y.mean()
+    
+        B1 = Sxy/Sxx
+        S2 = SSerr/(N-2)
+        S = np.sqrt(S2)
+    
+        interval = (abs(scs.t.ppf((1-.9)/2,df=60-2))*S)/np.sqrt(Sxx)
+        lower = B1 - interval
+        upper = B1 + interval
+    
+        return lower,upper
 
 
 
