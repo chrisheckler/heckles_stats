@@ -348,9 +348,34 @@ class heckles_stats:
         return lower,upper
 
 
+    def predicted_interval_y(data,conf,x0):
+        ''' Predicts Y for a given X
 
+            Takes data, confidence limit and X
 
+            Returns the predicted lower and upper bounds for Y
+        '''
+        X = data[0]
+        Y = data[1]
+        N = len(data)
+        Sxx = (sum(map(lambda x: x*x, X)))-(sum(X)**2/N)
+        Syy = (sum(map(lambda x: x*x, Y)))-(sum(Y)**2/N)
+        Sxy = (sum(map(lambda x,y: x*y, X,Y)))-(sum(X)*sum(Y)/N)
+        SSerr = Syy-Sxy**2/Sxx
+        MSerr = SSerr/(N-2)
+    
+        mx = X.mean()
+        my = Y.mean()
+    
+        B1 = Sxy/Sxx
+        B0 = my - (B1 * mx)
+    
+        interval = (abs(scs.t.ppf((1-conf)/2,df=N-2)))*(np.sqrt(MSerr* \
+          (1+(1/N)+((x0-mx)**2)/Sxx))) 
+        lower = B0+B1*x0 - interval
+        upper = B0+B1*x0 + interval  
 
+        return(lower,upper)
 
 
 
