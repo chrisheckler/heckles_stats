@@ -1,15 +1,28 @@
-""" 
-Copyright (c) 2018 Chris Heckler <hecklerchris@hotmail.com>
+    """ 
+    Copyright (c) 2018 Chris Heckler <hecklerchris@hotmail.com>
     
-This module takes a .csv and calculates
-Confidence Intervals and Hypothesis tests for mean, var, etc.
-"""
+    """
     
-import pandas as pd
-import numpy as np
-import scipy as sc
-import decimal
-from scipy import stats as scs
+    import pandas as pd
+    import numpy as np
+    import scipy as sc
+    import decimal
+    import json
+    import matplotlib.pyplot as plt
+    from argparse imort ArgumentParser
+    from scipy import stats as scs
+
+def parse_options(argv):
+
+    parser = argparse.ArgumentParser(description="Statistical Computation",
+                                     prog="Chris's Statistical Programming Program",
+                                     argument_default=argparse.SUPPRESS)
+    parser.add_argument('data', help="Initial data set")
+    parser.add_argument('-a', '--', type=str, dest='',
+                        help="")
+    parser.add_argument('--version', action='version', version='%(prog)s')
+    return parser.parse_args(argv)
+
     
 class heckles_stats:
     def __init__(self,filename):
@@ -221,3 +234,161 @@ class heckles_stats:
         else:
             decision = 'Reject H0'
             return t,pvalue,decision
+
+    def anova_table(data):
+    
+    ''' ANOVA Table
+        Regression Coefficients 
+    '''
+
+        Xvar = data.x.var() 
+        Xstd = data.x.std()
+        N = len(data)
+        mx = data.x.mean()
+        my = data.y.mean()
+        Sxx = (sum(map(lambda x: x*x, data.x)))-(sum(data.x)**2/N)
+        Syy = (sum(map(lambda x: x*x, data.y)))-(sum(data.y)**2/N)
+        Sxy = (sum(map(lambda x,y: x*y, data.x,data.y)))-(sum(data.x)*sum(data.y)/N)
+
+        # ANOVA 
+
+        Rsqr = Sxy**2/(Sxx*Syy)
+
+        DFreg = 1
+        DFerr = N-1
+        DFtotal = DFreg + DFerr
+        SSreg = Sxy**2/Sxx
+        SSerr = Syy-Sxy**2/Sxx
+        SStotal = Syy
+
+        MSreg = SSreg/1
+        MSerr = SSerr/(N-2)
+
+        F = MSreg/MSerr
+        p_value = scs.f.sf(F, DFerr,DFerr)
+
+        # Regression Coefficients
+
+        B1 = Sxy/Sxx            # Slope
+        B0 = (my-B1*mx)         # Intercept  
+
+
+        print('____________________________________________________________')
+        print('ANOVA Table \n')
+        print('Source      DF  S.S          M.S         F*       P-value')
+        print('Regression  1   {}  {}  {}  {}'.format(round(SSreg,4), \
+             round(MSreg,4), round(F,4), round(p_value,4)))
+        print('Residual    {}  {}   {}'.format(round(DFerr,4),round(SSerr,4), \ 
+             round(MSerr,4)))
+        print('Total       {}  {}\n'.format(DFtotal,round(SStotal,4)))
+        print('R^2         {}'.format(round(Rsqr,4)))
+        print('____________________________________________________________')
+        print('Regression Coefficients \n')
+        print('B0  {}'.format(round(B0,4)))
+        print('B1   {}'.format(round(B1,4)))
+        print('____________________________________________________________')
+
+    def confidence_interval_intercept(data,conf):
+        ''' This function calulates a confidence interval for the intercept
+                 
+            Function takes in data and confidence level
+             
+            The lower and upper bounds are returned  
+        '''
+
+        X = data[0]
+        Y = data[1]
+        N = len(data)
+        Sxx = (sum(map(lambda x: x*x, X)))-(sum(X)**2/N)
+        Syy = (sum(map(lambda x: x*x, Y)))-(sum(Y)**2/N)
+        Sxy = (sum(map(lambda x,y: x*y, X,Y)))-(sum(X)*sum(Y)/N)
+        SSerr = Syy-Sxy**2/Sxx
+
+        mx = X.mean()
+        my = Y.mean()
+
+        B0 = my - (B1 * mx)
+        S2 = SSerr/(N-2)
+        S = np.sqrt(S2)
+    
+        interval = abs(scs.t.ppf((1-conf)/2,df=N-2)) * S * np.sqrt(1/N + (mx**2)/Sxx)
+        lower = B0 - interval
+        upper = B0 + interval
+    
+        return lower,upper         
+
+
+    def confidence_interval_slope(data,conf):
+        ''' Calculates a confidence interveral for the slope
+
+            Takes in data and confidence level
+
+            Returns the upper and lower bound.
+        '''
+
+        X = data[0]
+        Y = data[1]
+        N = len(data)
+        Sxx = (sum(map(lambda x: x*x, X)))-(sum(X)**2/N)
+        Syy = (sum(map(lambda x: x*x, Y)))-(sum(Y)**2/N)
+        Sxy = (sum(map(lambda x,y: x*y, X,Y)))-(sum(X)*sum(Y)/N)
+        SSerr = Syy-Sxy**2/Sxx
+
+        mx = X.mean()
+        my = Y.mean()
+    
+        B1 = Sxy/Sxx
+        S2 = SSerr/(N-2)
+        S = np.sqrt(S2)
+    
+        interval = (abs(scs.t.ppf((1-.9)/2,df=60-2))*S)/np.sqrt(Sxx)
+        lower = B1 - interval
+        upper = B1 + interval
+    
+        return lower,upper
+
+
+    def predicted_interval_y(data,conf,x0):
+        ''' Predicts Y for a given X
+
+            Takes data, confidence limit and X
+
+            Returns the predicted lower and upper bounds for Y
+        '''
+        X = data[0]
+        Y = data[1]
+        N = len(data)
+        Sxx = (sum(map(lambda x: x*x, X)))-(sum(X)**2/N)
+        Syy = (sum(map(lambda x: x*x, Y)))-(sum(Y)**2/N)
+        Sxy = (sum(map(lambda x,y: x*y, X,Y)))-(sum(X)*sum(Y)/N)
+        SSerr = Syy-Sxy**2/Sxx
+        MSerr = SSerr/(N-2)
+    
+        mx = X.mean()
+        my = Y.mean()
+    
+        B1 = Sxy/Sxx
+        B0 = my - (B1 * mx)
+    
+        interval = (abs(scs.t.ppf((1-conf)/2,df=N-2)))*(np.sqrt(MSerr* \
+          (1+(1/N)+((x0-mx)**2)/Sxx))) 
+        lower = B0+B1*x0 - interval
+        upper = B0+B1*x0 + interval  
+
+        return(lower,upper)
+
+
+
+
+
+
+
+
+        
+
+
+if __name__ == '__main__':
+    opts = parse_options(sys.argv[1:])
+
+    print("Chris's Statistical Computation Program\n\n")
+

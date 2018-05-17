@@ -1,15 +1,15 @@
-""" 
-Copyright (c) 2018 Chris Heckler <hecklerchris@hotmail.com>
+    """ 
+    Copyright (c) 2018 Chris Heckler <hecklerchris@hotmail.com>
     
-This module takes a .csv and calculates
-Confidence Intervals and Hypothesis tests for mean, var, etc.
-"""
+    This module takes a .csv and calculates
+    Confidence Intervals and Hypothesis tests for mean, var, etc.
+    """
     
-import pandas as pd
-import numpy as np
-import scipy as sc
-import decimal
-from scipy import stats as scs
+    import pandas as pd
+    import numpy as np
+    import scipy as sc
+    import decimal
+    from scipy import stats as scs
     
 class heckles_stats:
     def __init__(self,filename):
